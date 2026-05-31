@@ -1,0 +1,65 @@
+/* Match Login/Register theme: pink translucent card, rounded inputs, gradient buttons */
+*{box-sizing:border-box}
+.add-product-page{
+  min-height:100vh;
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background-image: url('/loginpage.jpg');
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  padding: 32px 12px;
+}
+.add-product-card{
+  width:680px;
+  padding:2rem;
+  border-radius:16px;
+  background: rgba(255,182,193,0.35);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.18);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.25);
+}
+.add-product-page h2{
+  margin:0 0 1rem 0;
+  text-align:left;
+  color:#3b2f33;
+}
+.add-product-form{ display:flex; flex-direction:column; gap:12px }
+.add-product-form label{ display:flex; flex-direction:column; gap:6px; font-size:14px; color:#3b2f33 }
+.add-product-form input, .add-product-form textarea{
+  width:100%;
+  padding:0.85rem 1rem;
+  margin:0;
+  border-radius:10px;
+  border:none;
+  background: rgba(255,255,255,0.85);
+  font-size:0.9rem;
+}
+.add-product-form textarea{ min-height:120px; resize:vertical }
+.add-product-form input::placeholder, .add-product-form textarea::placeholder{ color:#6b565c }
+fieldset{ border:1px solid rgba(0,0,0,0.04); padding:10px; border-radius:8px }
+fieldset legend{ font-weight:600; padding:0 6px }
+.add-product-form .row{ display:flex; gap:8px; align-items:center }
+.add-product-form .row input{ flex:1 }
+.add-product-form .muted{ font-size:12px; color:#6b565c }
+
+.btn-gradient{
+  padding:0.85rem 1rem;
+  border-radius:10px;
+  border:none;
+  background: linear-gradient(90deg,#ff6b9a,#ff8fb3);
+  color:#fff;
+  font-weight:700;
+  cursor:pointer;
+}
+.btn-muted{ padding:0.6rem 0.8rem; border-radius:8px; background:transparent; border:1px solid rgba(0,0,0,0.06); }
+.btn-muted.muted-link{ color:#3b2f33; text-decoration:none }
+.btn-gradient:active{ transform:translateY(1px) }
+.btn-gradient[disabled]{ opacity:0.6; cursor:not-allowed }
+
+.form-actions{ display:flex; gap:12px; align-items:center; margin-top:8px }
+
+@media (max-width:720px){ .add-product-card{ width:100%; padding:1.25rem } }
