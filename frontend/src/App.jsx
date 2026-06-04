@@ -5,6 +5,8 @@ import RegisterPage from './pages/RegisterPage'
 import './App.css'
 import AddProduct from './pages/admin/AddProduct'
 import ViewProducts from './pages/admin/ViewProducts'
+import AdminHomePage from './pages/admin/AdminHomePage'
+import EditProduct from './pages/admin/EditProduct'
 
 function App() {
   return (
@@ -16,6 +18,9 @@ function App() {
         <Route path="/register" element={<RegisterPage/>} />
         <Route path="/admin/addProduct" element={<AddProduct/>} />
         <Route path="/admin/viewProducts" element={<ViewProducts/>} />
+        <Route path="/admin" element={<AdminHomePage/>} />
+        <Route path="/admin/editProduct" element={<EditProduct/>} />
+        <Route path="/admin/editProduct/:id" element={<EditProduct/>} />
       </Routes>
     </BrowserRouter>
   )

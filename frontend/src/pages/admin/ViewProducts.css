@@ -43,5 +43,16 @@
   text-decoration:none;
   box-shadow:0 8px 20px rgba(0,0,0,0.18);
 }
+.vp-delete{ cursor: pointer; }
+.vp-delete{
+  color:#ff4c4c;
+}
+
+.vp-edit{ 
+  cursor: pointer;
+   display:inline-flex;
+    align-items:center;
+color:#4d90fe;
+} 
 
 @media (max-width:820px){ .img-cell img{ width:64px; height:64px } .vp-card{ padding:12px } }

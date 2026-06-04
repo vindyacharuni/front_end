@@ -1,11 +1,15 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useLocation, useParams } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import UploadMedia from "../../utils/UploadMedia";// Ensure this path is correct
 import "./AddProduct.css";
+export default function EditProduct() {
+  const location = useLocation();
+  const params = useParams();
 
-export default function AddProduct() {
+  const [initialProduct, setInitialProduct] = useState(null);
+
   const [productId, setProductId] = useState("");
   const [name, setName] = useState("");
   const [altNames, setAltNames] = useState([""]);
@@ -14,7 +18,7 @@ export default function AddProduct() {
   const [description, setDescription] = useState("");
   const [stock, setStock] = useState(0);
   const [isAvailable, setIsAvailable] = useState(true);
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState("cosmetics");
   
   // New state to hold the actual File objects
   const [imageFiles, setImageFiles] = useState([]);
@@ -35,17 +39,53 @@ export default function AddProduct() {
     setImageFiles(files);
   };
 
+  useEffect(() => {
+    // If router passed the product in state, use it; otherwise fetch by id param
+    if (location.state) {
+      setInitialProduct(location.state);
+    } else if (params.id) {
+      axios.get(`http://localhost:5000/api/products/${params.id}`).then((res) => setInitialProduct(res.data)).catch(() => {});
+    }
+  }, [location.state, params.id]);
+
+  // When initialProduct is ready, populate form fields
+  useEffect(() => {
+    if (!initialProduct) return;
+    setProductId(initialProduct.productId || "");
+    setName(initialProduct.name || "");
+    setAltNames(initialProduct.altNames || [""]);
+    setLabelledPrice(initialProduct.labelledPrice || "");
+    setPrice(initialProduct.price || "");
+    setDescription(initialProduct.description || "");
+    setStock(initialProduct.stock || 0);
+    setIsAvailable(initialProduct.isAvailable ?? true);
+    setCategory(initialProduct.category || "cosmetics");
+  }, [initialProduct]);
+
   const resetForm = () => {
-    setProductId("");
-    setName("");
-    setAltNames([""]);
-    setLabelledPrice("");
-    setPrice("");
-    setImageFiles([]); // Reset files
-    setDescription("");
-    setStock(0);
-    setIsAvailable(true);
-    setCategory("cosmetics");
+    if (initialProduct) {
+      setProductId(initialProduct.productId || "");
+      setName(initialProduct.name || "");
+      setAltNames(initialProduct.altNames || [""]);
+      setLabelledPrice(initialProduct.labelledPrice || "");
+      setPrice(initialProduct.price || "");
+      setImageFiles([]);
+      setDescription(initialProduct.description || "");
+      setStock(initialProduct.stock || 0);
+      setIsAvailable(initialProduct.isAvailable ?? true);
+      setCategory(initialProduct.category || "cosmetics");
+    } else {
+      setProductId("");
+      setName("");
+      setAltNames([""]);
+      setLabelledPrice("");
+      setPrice("");
+      setImageFiles([]);
+      setDescription("");
+      setStock(0);
+      setIsAvailable(true);
+      setCategory("cosmetics");
+    }
     
     // Clear the file input visually
     const fileInput = document.getElementById("product-images");
@@ -88,17 +128,17 @@ export default function AddProduct() {
         category: String(category) || "",
       };
 
-      // 3. Save to your database
+      // 3. Update the product in your database
       await axios.put(`http://localhost:5000/api/products/${productId}`, payload, {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
       
-      toast.success("Product created successfully");
+      toast.success("Product updated successfully");
       resetForm();
     } catch (err) {
-      const errMsg = err.response?.data?.message || err.message || "Failed to create product";
+      const errMsg = err.response?.data?.message || err.message || "Failed to update product";
       toast.error(errMsg);
     } finally {
       setLoading(false);
@@ -108,11 +148,11 @@ export default function AddProduct() {
   return (
     <div className="add-product-page">
       <div className="add-product-card">
-        <h2>Add Product</h2>
+        <h2>Edit Product</h2>
         <form onSubmit={handleSubmit} className="add-product-form">
           <label>
             Product ID*:
-            <input value={productId} onChange={(e) => setProductId(e.target.value)} required />
+            <input value={productId} onChange={(e) => setProductId(e.target.value)} required readOnly />
           </label>
 
           <label>
@@ -193,7 +233,7 @@ export default function AddProduct() {
             <button type="button" onClick={resetForm} className="btn-muted">Reset</button>
             <Link to="/admin/AdminHomePage" className="btn-muted muted-link">View Products</Link>
             <button type="submit" disabled={loading} className="btn-gradient">
-              {loading ? "Uploading & Saving..." : "Add Product"}
+              {loading ? "Uploading & Saving..." : "Update Product"}
             </button>
           </div>
         </form>
