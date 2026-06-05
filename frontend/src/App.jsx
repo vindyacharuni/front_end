@@ -7,13 +7,14 @@ import AddProduct from './pages/admin/AddProduct'
 import ViewProducts from './pages/admin/ViewProducts'
 import AdminHomePage from './pages/admin/AdminHomePage'
 import EditProduct from './pages/admin/EditProduct'
+import ClientHomePage from './pages/client/ClientHomePage'
+import Header from './components/Header'
 
 function App() {
   return (
     <BrowserRouter>
       <Toaster />
       <Routes>
-        <Route path="/" element={<LoginPage/>} />
         <Route path="/Login" element={<LoginPage/>} />
         <Route path="/register" element={<RegisterPage/>} />
         <Route path="/admin/addProduct" element={<AddProduct/>} />
@@ -21,6 +22,7 @@ function App() {
         <Route path="/admin" element={<AdminHomePage/>} />
         <Route path="/admin/editProduct" element={<EditProduct/>} />
         <Route path="/admin/editProduct/:id" element={<EditProduct/>} />
+        <Route path="/*" element={<ClientHomePage/>} />
       </Routes>
     </BrowserRouter>
   )
