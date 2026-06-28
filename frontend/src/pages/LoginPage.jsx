@@ -8,11 +8,32 @@ import "./LoginPage.css";
 export default function LoginPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
+    const validateForm = () => {
+        let tempErrors = {};
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!email.trim()) {
+            tempErrors.email = "Email is required";
+        } else if (!emailRegex.test(email)) {
+            tempErrors.email = "Please enter a valid email address";
+        }
+
+        if (!password) {
+            tempErrors.password = "Password is required";
+        }
+
+        setErrors(tempErrors);
+        return Object.keys(tempErrors).length === 0;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!validateForm()) return;
+        
         setLoading(true);
         try {
             const res = await axios.post("http://localhost:5000/api/users/login", { email, password });
@@ -43,23 +64,31 @@ export default function LoginPage() {
                 <form onSubmit={handleSubmit} className="login-form">
                     <h2 className="login-title">Log in</h2>
                     <input
-                        className="login-input"
+                        className={`login-input ${errors.email ? "border border-red-500" : ""}`}
                         type="email"
                         placeholder="Email"
                         aria-label="Email"
                         value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
+                        onChange={(e) => {
+                            setEmail(e.target.value);
+                            if (errors.email) setErrors({ ...errors, email: "" });
+                        }}
                     />
+                    {errors.email && <span className="login-error-message">{errors.email}</span>}
+
                     <input
-                        className="login-input"
+                        className={`login-input ${errors.password ? "border border-red-500" : ""}`}
                         type="password"
                         placeholder="Password"
                         aria-label="Password"
                         value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
+                        onChange={(e) => {
+                            setPassword(e.target.value);
+                            if (errors.password) setErrors({ ...errors, password: "" });
+                        }}
                     />
+                    {errors.password && <span className="login-error-message">{errors.password}</span>}
+
                     <button className="login-button" type="submit" disabled={loading}>
                         {loading ? "Logging in..." : "Log in"}
                     </button>

@@ -10,16 +10,43 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  const validateForm = () => {
+    let tempErrors = {};
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!fullName.trim()) {
+      tempErrors.fullName = "Full name is required";
+    } else if (fullName.trim().split(/\s+/).length < 2) {
+      tempErrors.fullName = "Please enter both first and last name";
+    }
+
+    if (!email.trim()) {
+      tempErrors.email = "Email is required";
+    } else if (!emailRegex.test(email)) {
+      tempErrors.email = "Please enter a valid email address";
+    }
+
+    if (!password) {
+      tempErrors.password = "Password is required";
+    } else if (password.length < 6) {
+      tempErrors.password = "Password must be at least 6 characters long";
+    }
+
+    if (password !== confirmPassword) {
+      tempErrors.confirmPassword = "Passwords do not match!";
+    }
+
+    setErrors(tempErrors);
+    return Object.keys(tempErrors).length === 0;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (password !== confirmPassword) {
-      toast.error("Passwords do not match!");
-      return;
-    }
+    if (!validateForm()) return;
 
     setLoading(true);
 
@@ -59,41 +86,57 @@ export default function RegisterPage() {
         <form onSubmit={handleSubmit} className="register-form">
           <h2 className="register-title">Create account</h2>
           <input
-            className="register-input"
+            className={`register-input ${errors.fullName ? "border border-red-500" : ""}`}
             type="text"
             placeholder="Full name"
             aria-label="Full name"
             value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-            required
+            onChange={(e) => {
+              setFullName(e.target.value);
+              if (errors.fullName) setErrors({ ...errors, fullName: "" });
+            }}
           />
+          {errors.fullName && <span className="register-error-message">{errors.fullName}</span>}
+
           <input
-            className="register-input"
+            className={`register-input ${errors.email ? "border border-red-500" : ""}`}
             type="email"
             placeholder="Email"
             aria-label="Email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (errors.email) setErrors({ ...errors, email: "" });
+            }}
           />
+          {errors.email && <span className="register-error-message">{errors.email}</span>}
+
           <input
-            className="register-input"
+            className={`register-input ${errors.password ? "border border-red-500" : ""}`}
             type="password"
             placeholder="Password"
             aria-label="Password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
+            onChange={(e) => {
+              setPassword(e.target.value);
+              if (errors.password) setErrors({ ...errors, password: "" });
+            }}
           />
+          {errors.password && <span className="register-error-message">{errors.password}</span>}
+
           <input
-            className="register-input"
+            className={`register-input ${errors.confirmPassword ? "border border-red-500" : ""}`}
             type="password"
             placeholder="Confirm password"
             aria-label="Confirm password"
             value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
+            onChange={(e) => {
+              setConfirmPassword(e.target.value);
+              if (errors.confirmPassword) setErrors({ ...errors, confirmPassword: "" });
+            }}
           />
+          {errors.confirmPassword && <span className="register-error-message">{errors.confirmPassword}</span>}
+
           <button className="register-button" type="submit" disabled={loading}>
             {loading ? "Registering..." : "Register"}
           </button>
