@@ -63,6 +63,8 @@ export default function ProductsPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [sortBy, setSortBy] = useState("featured")
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 8
 
   useEffect(() => {
     axios
@@ -83,6 +85,11 @@ export default function ProductsPage() {
       })
   }, [])
 
+  // Reset page when filters or sorting change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery, selectedCategory, sortBy])
+
   // Filter & Sort Logic
   const filteredProducts = products
     .filter((prod) => {
@@ -102,6 +109,13 @@ export default function ProductsPage() {
       if (sortBy === "price-high") return b.price - a.price
       return 0 // "featured" or default
     })
+
+  // Pagination Logic
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage)
+  const paginatedProducts = filteredProducts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  )
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-12">
@@ -180,11 +194,53 @@ export default function ProductsPage() {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 justify-items-center animate-fade-in">
-          {filteredProducts.map((product) => (
-            <ProductCard key={product.productId} product={product} />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 justify-items-center animate-fade-in">
+            {paginatedProducts.map((product) => (
+              <ProductCard key={product.productId} product={product} />
+            ))}
+          </div>
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center gap-2 mt-12 pt-6 border-t border-stone-100">
+              <button
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="px-4 py-2 border border-stone-200 text-stone-700 hover:bg-stone-50 text-xs font-semibold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
+              >
+                Previous
+              </button>
+              
+              <div className="flex items-center gap-1.5">
+                {Array.from({ length: totalPages }).map((_, idx) => {
+                  const pageNum = idx + 1
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => setCurrentPage(pageNum)}
+                      className={`w-9 h-9 text-xs font-semibold rounded-xl transition-all cursor-pointer ${
+                        currentPage === pageNum
+                          ? "bg-indigo-600 text-white shadow-2xs"
+                          : "border border-stone-200 text-stone-700 hover:bg-stone-50"
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  )
+                })}
+              </div>
+
+              <button
+                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="px-4 py-2 border border-stone-200 text-stone-700 hover:bg-stone-50 text-xs font-semibold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
+              >
+                Next
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   )

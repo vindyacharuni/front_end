@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { useNavigate, Link } from "react-router-dom"
+import axios from "axios"
 import { getCart, getTotal, clearCart } from "../../utils/cart"
 import { toast } from "react-hot-toast"
 import { IoCheckmarkCircleOutline, IoArrowBackOutline, IoChevronForwardOutline } from "react-icons/io5"
@@ -17,6 +18,7 @@ export default function CheckoutPage() {
     firstName: "",
     lastName: "",
     email: "",
+    phone: "",
     address: "",
     city: "",
     zipCode: "",
@@ -25,30 +27,83 @@ export default function CheckoutPage() {
     cvv: "",
   })
 
+  // Simple client-side JWT decoder
+  const decodeToken = (token) => {
+    try {
+      const base64Url = token.split(".")[1]
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/")
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split("")
+          .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+          .join("")
+      )
+      return JSON.parse(jsonPayload)
+    } catch (e) {
+      return null
+    }
+  }
+
   useEffect(() => {
     setItems(getCart())
     setTotal(getTotal())
+
+    const token = localStorage.getItem("token")
+    if (token) {
+      const user = decodeToken(token)
+      if (user) {
+        setFormData((prev) => ({
+          ...prev,
+          firstName: user.firstName || "",
+          lastName: user.lastName || "",
+          email: user.email || "",
+        }))
+      }
+    }
   }, [])
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     if (items.length === 0) {
       toast.error("Your cart is empty.")
       return
     }
 
+    const token = localStorage.getItem("token")
+    if (!token) {
+      toast.error("Please login to place an order.")
+      navigate("/Login")
+      return
+    }
+
     setLoading(true)
 
-    // Simulate API request
-    setTimeout(() => {
-      setLoading(false)
+    try {
+      const fullAddress = `${formData.address}, ${formData.city}, ${formData.zipCode}`
+      const formattedItems = items.map((item) => ({
+        productId: item.productId || item.id || item._id,
+        quantity: item.quantity || 1,
+      }))
+
+      const res = await axios.post(
+        "http://localhost:5000/api/orders",
+        {
+          address: fullAddress,
+          phone: formData.phone,
+          items: formattedItems,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+
       clearCart()
-      const randOrder = `AS-${Math.floor(100000 + Math.random() * 900000)}`
-      setOrderNumber(randOrder)
+      const createdOrder = res.data?.result
+      setOrderNumber(createdOrder?.orderId || `AS-${Math.floor(100000 + Math.random() * 900000)}`)
       setOrderPlaced(true)
       toast.success("Order placed successfully!", {
         style: {
@@ -57,7 +112,13 @@ export default function CheckoutPage() {
           borderRadius: "12px",
         },
       })
-    }, 1800)
+    } catch (err) {
+      console.error("Error submitting order:", err)
+      const errMsg = err.response?.data?.message || err.message || "Failed to place order."
+      toast.error(errMsg)
+    } finally {
+      setLoading(false)
+    }
   }
 
   if (orderPlaced) {
@@ -147,17 +208,31 @@ export default function CheckoutPage() {
                   />
                 </label>
               </div>
-              <label className="flex flex-col text-xs font-semibold text-stone-600">
-                Email Address*
-                <input
-                  type="email"
-                  name="email"
-                  required
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="mt-1 px-4 py-2.5 bg-stone-50 border border-stone-200 focus:border-indigo-500 rounded-xl text-stone-900 font-medium focus:outline-none"
-                />
-              </label>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <label className="flex flex-col text-xs font-semibold text-stone-600">
+                  Email Address*
+                  <input
+                    type="email"
+                    name="email"
+                    required
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="mt-1 px-4 py-2.5 bg-stone-50 border border-stone-200 focus:border-indigo-500 rounded-xl text-stone-900 font-medium focus:outline-none"
+                  />
+                </label>
+                <label className="flex flex-col text-xs font-semibold text-stone-600">
+                  Phone Number*
+                  <input
+                    type="text"
+                    name="phone"
+                    required
+                    value={formData.phone}
+                    onChange={handleChange}
+                    className="mt-1 px-4 py-2.5 bg-stone-50 border border-stone-200 focus:border-indigo-500 rounded-xl text-stone-900 font-medium focus:outline-none"
+                  />
+                </label>
+              </div>
             </div>
 
             {/* Shipping Address */}

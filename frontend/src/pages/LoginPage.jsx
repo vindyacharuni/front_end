@@ -3,6 +3,7 @@ import { useState } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { IoClose } from "react-icons/io5";
+import { GoogleLogin } from "@react-oauth/google";
 import "./LoginPage.css";
 
 export default function LoginPage() {
@@ -50,6 +51,29 @@ export default function LoginPage() {
         }
     };
 
+    const handleGoogleSuccess = async (credentialResponse) => {
+        setLoading(true);
+        try {
+            const res = await axios.post("http://localhost:5000/api/users/google-login", {
+                token: credentialResponse.credential
+            });
+            toast.success("Logged in with Google successfully.");
+            if (res.data && res.data.token) {
+                localStorage.setItem("token", res.data.token);
+            }
+            navigate("/");
+        } catch (err) {
+            const errMsg = err.response?.data?.message || err.message || "Google sign in failed";
+            toast.error(errMsg);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleGoogleError = () => {
+        toast.error("Google Sign-In was unsuccessful. Try again.");
+    };
+
     return (
         <div className="login-page">
             <div className="login-card" role="region" aria-label="Login form">
@@ -92,6 +116,22 @@ export default function LoginPage() {
                     <button className="login-button" type="submit" disabled={loading}>
                         {loading ? "Logging in..." : "Log in"}
                     </button>
+
+                    <div className="divider" style={{ display: "flex", alignItems: "center", margin: "1rem 0" }}>
+                        <div style={{ flex: 1, height: "1px", backgroundColor: "rgba(0,0,0,0.1)" }}></div>
+                        <span style={{ padding: "0 10px", fontSize: "0.75rem", color: "#6b565c", fontWeight: "600" }}>OR</span>
+                        <div style={{ flex: 1, height: "1px", backgroundColor: "rgba(0,0,0,0.1)" }}></div>
+                    </div>
+
+                    <div style={{ display: "flex", justifyContent: "center" }}>
+                        <GoogleLogin
+                            onSuccess={handleGoogleSuccess}
+                            onError={handleGoogleError}
+                            theme="outline"
+                            shape="pill"
+                            width="100%"
+                        />
+                    </div>
                     
                     <p className="signup-link">Don't have an account? <Link to="/register">Sign up</Link></p>
                 </form>

@@ -5,6 +5,7 @@ import ProductsPage from "./ProductsPage"
 import ProductOverview from "./ProductOverview"
 import LandingPage from "./LandingPage"
 import CheckoutPage from "./CheckoutPage"
+import MyOrders from "./MyOrders"
 
 export default function ClientHomePage() {
   return (
@@ -19,6 +20,7 @@ export default function ClientHomePage() {
           <Route path="/products" element={<ProductsPage />} />
           <Route path="/products/:productId" element={<ProductOverview />} />
           <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/my-orders" element={<MyOrders />} />
           <Route
             path="/reviews"
             element={
