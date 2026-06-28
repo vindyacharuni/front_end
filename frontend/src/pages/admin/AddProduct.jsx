@@ -190,8 +190,7 @@ export default function AddProduct() {
           </label>
           
           <div className="form-actions">
-            <button type="button" onClick={resetForm} className="btn-muted">Reset</button>
-            <Link to="/admin/AdminHomePage" className="btn-muted muted-link">View Products</Link>
+            <Link to="/admin" className="btn-muted muted-link">Cancel</Link>
             <button type="submit" disabled={loading} className="btn-gradient">
               {loading ? "Uploading & Saving..." : "Add Product"}
             </button>

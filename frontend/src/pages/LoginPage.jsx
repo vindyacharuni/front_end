@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
+import { IoClose } from "react-icons/io5";
 import "./LoginPage.css";
 
 export default function LoginPage() {
@@ -31,6 +32,14 @@ export default function LoginPage() {
     return (
         <div className="login-page">
             <div className="login-card" role="region" aria-label="Login form">
+                <button
+                    type="button"
+                    onClick={() => navigate("/")}
+                    className="login-close-button"
+                    aria-label="Close"
+                >
+                    <IoClose size={18} />
+                </button>
                 <form onSubmit={handleSubmit} className="login-form">
                     <h2 className="login-title">Log in</h2>
                     <input
